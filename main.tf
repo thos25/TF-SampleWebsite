@@ -26,6 +26,8 @@ resource "azurerm_app_service_plan" "joeyaxtell-sample-website" {
   name                = "joeyaxtell-sample-website-appserviceplan"
   location            = azurerm_resource_group.joeyaxtell-sample-website.location
   resource_group_name = azurerm_resource_group.joeyaxtell-sample-website.name
+  #kind = "Linux"
+  #reserved = "true"
 
   sku {
     tier = "Standard"
