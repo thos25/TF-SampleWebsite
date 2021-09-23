@@ -42,7 +42,7 @@ resource "azurerm_app_service" "joeyaxtell-sample-website" {
   app_service_plan_id = azurerm_app_service_plan.joeyaxtell-sample-website.id
 
   site_config {
-    python_version = "3.4"
+    python_version = "3.6"
   #  scm_type                 = "GitHub"
   }
 }
