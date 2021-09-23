@@ -11,7 +11,7 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
 
     steps:
     - uses: actions/checkout@v2
@@ -35,7 +35,7 @@ jobs:
         path: ${{env.DOTNET_ROOT}}/myapp
 
   deploy:
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
     needs: build
     environment:
       name: 'production'
@@ -53,5 +53,5 @@ jobs:
       with:
         app-name: 'joeyaxtell-sample-website-app-service'
         slot-name: 'production'
-        publish-profile: ${{ secrets.AzureAppService_PublishProfile_fb06e72d06b84ba3aad53a1f026ccdc6 }}
+        publish-profile: ${{ secrets.AzureAppService_PublishProfile_daaf7f5a20e34cee95aaf1480bd088cb }}
         package: .
