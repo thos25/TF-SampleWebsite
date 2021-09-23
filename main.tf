@@ -26,8 +26,8 @@ resource "azurerm_app_service_plan" "joeyaxtell-sample-website" {
   name                = "joeyaxtell-sample-website-appserviceplan"
   location            = azurerm_resource_group.joeyaxtell-sample-website.location
   resource_group_name = azurerm_resource_group.joeyaxtell-sample-website.name
-  #kind = "Linux"
-  #reserved = "true"
+  kind = "Linux"
+  reserved = "true"
 
   sku {
     tier = "Standard"
@@ -42,7 +42,7 @@ resource "azurerm_app_service" "joeyaxtell-sample-website" {
   app_service_plan_id = azurerm_app_service_plan.joeyaxtell-sample-website.id
 
   site_config {
-    dotnet_framework_version = "v5.0"
-  #  scm_type                 = "GitHub"
-  }
-}
+    linux_fx_version  = "DOTNETCORE|3.1"
+   #  scm_type                 = "GitHub"
+   }
+ }
