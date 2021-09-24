@@ -43,10 +43,72 @@ resource "azurerm_app_service" "joeyaxtell-sample-website" {
 
   site_config {
     linux_fx_version  = "DOTNETCORE|3.1"
+    #scm_type = "GitHub"
    }
 
-  source_control {
-    repo_url = "https://github.com/thos25/Sample-Website"
-    branch = "main"
-  }
+   source_control {
+     repo_url = "https://github.com/thos25/Sample-Website"
+     branch = "main"
+     manual_integration = "false"
+     rollback_enabled = "false"
+     use_mercurial = "false"
+   }
+}
+
+resource "azurerm_app_service_source_control_token" "joeyaxtell-sample-website" {
+  type  = "GitHub"
+  token = "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"
+}
+
+### Configure App Service Plan auto-scaling out and in
+
+resource "azurerm_monitor_autoscale_setting" "joeyaxtell-sample-website" {
+  name                = "myAutoscaleSetting"
+  resource_group_name = azurerm_resource_group.joeyaxtell-sample-website.name
+  location            = azurerm_resource_group.joeyaxtell-sample-website.location
+  target_resource_id  = azurerm_app_service_plan.joeyaxtell-sample-website.id
+  profile {
+    name = "default"
+    capacity {
+      default = 1
+      minimum = 1
+      maximum = 3
+    }
+    rule {
+      metric_trigger {
+        metric_name        = "CpuPercentage"
+        metric_resource_id = azurerm_app_service_plan.joeyaxtell-sample-website.id
+        time_grain         = "PT1M"
+        statistic          = "Average"
+        time_window        = "PT5M"
+        time_aggregation   = "Average"
+        operator           = "GreaterThan"
+        threshold          = 90
+      }
+      scale_action {
+        direction = "Increase"
+        type      = "ChangeCount"
+        value     = "1"
+        cooldown  = "PT1M"
+      }
+    }
+    rule {
+      metric_trigger {
+        metric_name        = "CpuPercentage"
+        metric_resource_id = azurerm_app_service_plan.joeyaxtell-sample-website.id
+        time_grain         = "PT1M"
+        statistic          = "Average"
+        time_window        = "PT5M"
+        time_aggregation   = "Average"
+        operator           = "LessThan"
+        threshold          = 10
+      }
+      scale_action {
+        direction = "Decrease"
+        type      = "ChangeCount"
+        value     = "1"
+        cooldown  = "PT1M"
+      }
+    }
+  }  
 }
