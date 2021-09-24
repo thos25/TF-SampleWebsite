@@ -2,7 +2,7 @@ terraform {
   required_providers {
     azurerm = {
       source  = "hashicorp/azurerm"
-      version = "=2.46.0"
+      version = "=2.77.0"
     }
   }
 }
@@ -43,6 +43,10 @@ resource "azurerm_app_service" "joeyaxtell-sample-website" {
 
   site_config {
     linux_fx_version  = "DOTNETCORE|3.1"
-   #  scm_type                 = "GitHub"
    }
- }
+
+  source_control {
+    repo_url = "https://github.com/thos25/Sample-Website"
+    branch = "main"
+  }
+}
