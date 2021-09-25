@@ -22,17 +22,17 @@ For this project you'll need the following
 Deploy
 
 Clone the repo
-- git clone https://github.com/thos25/TF-SampleWebsite.git
+    - git clone https://github.com/thos25/TF-SampleWebsite.git
 
 Login to Azure via Azure CLI
-  - az login
+    - az login
 
 Initialize Terraform and download the correct modules
-  - terraform init
+    - terraform init
 
 Plan the build
-  - terraform plan -out=tfplan
+    - terraform plan -out=tfplan
 
 Run the build
-  - terraform apply tfplan
+    - terraform apply tfplan
 
