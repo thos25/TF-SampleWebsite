@@ -1,3 +1,12 @@
+###########################################################################
+#####                   Terraform Deploy for Sapmle Website            ####
+####    Created by:  Joey Axtell                                       ####
+####    Last Modified:  09/25/2021                                     ####
+####    Description:  Deploy resource group, app service, app service  ####
+####                  plan, CI/CD pipeline, and autoscale settings for ####
+####                  sample-website being deployed to Azure.          ####
+###########################################################################
+ 
 terraform {
   required_providers {
     azurerm = {
@@ -7,23 +16,20 @@ terraform {
   }
 }
 
-# Configure the Microsoft Azure Provider
+# Configure the Microsoft Azurerm Provider
 provider "azurerm" {
   features {}
-  
-  #subscription_id = "${env.ARM_SUBSCRIPTION_ID}"
-  #tenant_id         = "${env.ARM_TENNANT_ID}"
-  #client_id         = "${env.CLIENT_ID}"
-  #client_secret     = "${env.ARM_CLIENT_SECRET}"
 }
 
+# Create resource group for all project objects in Azure
 resource "azurerm_resource_group" "joeyaxtell-sample-website" {
-  name     = "joeyaxtell-sample-website-rg"
-  location = "central US"
+  name     = var.rg_name
+  location = var.az_location
 }
 
+#Create app service plan, specifying OS and SKU
 resource "azurerm_app_service_plan" "joeyaxtell-sample-website" {
-  name                = "joeyaxtell-sample-website-appserviceplan"
+  name                = var.appsp_name
   location            = azurerm_resource_group.joeyaxtell-sample-website.location
   resource_group_name = azurerm_resource_group.joeyaxtell-sample-website.name
   kind = "Linux"
@@ -35,8 +41,9 @@ resource "azurerm_app_service_plan" "joeyaxtell-sample-website" {
   }
 }
 
+#Create App service and define dotnetcore version 3.1 ans build environment
 resource "azurerm_app_service" "joeyaxtell-sample-website" {
-  name                = "joeyaxtell-sample-website-app-service"
+  name                = var.appsvc_name
   location            = azurerm_resource_group.joeyaxtell-sample-website.location
   resource_group_name = azurerm_resource_group.joeyaxtell-sample-website.name
   app_service_plan_id = azurerm_app_service_plan.joeyaxtell-sample-website.id
@@ -47,21 +54,23 @@ resource "azurerm_app_service" "joeyaxtell-sample-website" {
    }
 }
 
+#Configure Azure to use GitHub OAuth token for authenitcation
 resource "azurerm_app_service_source_control_token" "joeyaxtell-sample-website" {
   type  = "GitHub"
-#  token = "" ##NEED TO TOKENIZE
+  token = "token" ##NEED TO TOKENIZE
 }
 
+#Setup CI/CD pipeline from app service to Github.  This requires Azurerm 3.0 today
 resource "azurerm_app_service_source_control" "joeyaxtell-sample-website" {
   app_id   = azurerm_app_service.joeyaxtell-sample-website.id
-  repo_url = "https://github.com/thos25/Sample-Website"
+  repo_url = var.repo_url
   branch   = "main"
 }
 
-### Configure App Service Plan auto-scaling out and in
+# Configure App Service Plan auto-scaling out and in
 
 resource "azurerm_monitor_autoscale_setting" "joeyaxtell-sample-website" {
-  name                = "myAutoscaleSetting"
+  name                = var.autoscale_name
   resource_group_name = azurerm_resource_group.joeyaxtell-sample-website.name
   location            = azurerm_resource_group.joeyaxtell-sample-website.location
   target_resource_id  = azurerm_app_service_plan.joeyaxtell-sample-website.id
