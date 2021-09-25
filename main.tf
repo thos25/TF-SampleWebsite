@@ -45,19 +45,17 @@ resource "azurerm_app_service" "joeyaxtell-sample-website" {
     linux_fx_version  = "DOTNETCORE|3.1"
     #scm_type = "GitHub"
    }
-
-   source_control {
-     repo_url = "https://github.com/thos25/Sample-Website"
-     branch = "main"
-     manual_integration = "false"
-     rollback_enabled = "false"
-     use_mercurial = "false"
-   }
 }
 
 resource "azurerm_app_service_source_control_token" "joeyaxtell-sample-website" {
   type  = "GitHub"
-  token = "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"
+#  token = "" ##NEED TO TOKENIZE
+}
+
+resource "azurerm_app_service_source_control" "joeyaxtell-sample-website" {
+  app_id   = azurerm_app_service.joeyaxtell-sample-website.id
+  repo_url = "https://github.com/thos25/Sample-Website"
+  branch   = "main"
 }
 
 ### Configure App Service Plan auto-scaling out and in
