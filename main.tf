@@ -80,6 +80,8 @@ resource "azurerm_app_service" "joeyaxtell-sample-website" {
 
   app_settings = {
      "APPINSIGHTS_INSTRUMENTATIONKEY" = "${azurerm_application_insights.joeyaxtell-sample-website-appinsights.instrumentation_key}"
+     "ApplicationInsightsAgent_EXTENSION_VERSION" = "~3"
+     "XDT_MicrosoftApplicationInsights_Mode" = "recommended"
   }
 }
 
@@ -97,13 +99,15 @@ resource "azurerm_app_service" "joeyaxtell-sample-website-secondary" {
 
   app_settings = {
      "APPINSIGHTS_INSTRUMENTATIONKEY" = "${azurerm_application_insights.joeyaxtell-sample-website-appinsights.instrumentation_key}"
+     "ApplicationInsightsAgent_EXTENSION_VERSION" = "~3"
+     "XDT_MicrosoftApplicationInsights_Mode" = "recommended"
   }
 }
 
 #Configure Azure to use GitHub OAuth token for authenitcation
 resource "azurerm_app_service_source_control_token" "joeyaxtell-sample-website" {
   type  = "GitHub"
-  token = "TOKEN" ##NEED TO TOKENIZE
+  token = var.Github_OAuth ##NEED TO TOKENIZE
 }
 
 #Setup CI/CD pipeline from app service to Github.  This requires Azurerm 3.0 today
@@ -226,9 +230,70 @@ resource "azurerm_monitor_autoscale_setting" "joeyaxtell-sample-website-secondar
   }  
 }
 
-resource "azurerm_application_insights" "joeyaxtell-sample-website-appinsights" {
-  name                = "tf-test-appinsights"
+resource "azurerm_log_analytics_workspace" "joeyaxtell-sample-website-loganalytics" {
+  name                = "joeyaxtell-sample-website-loganalytics"
   location            = azurerm_resource_group.joeyaxtell-sample-website-appinsights.location
   resource_group_name = azurerm_resource_group.joeyaxtell-sample-website-appinsights.name
+  sku                 = "PerGB2018"
+  retention_in_days   = 30
+}
+
+resource "azurerm_application_insights" "joeyaxtell-sample-website-appinsights" {
+  name                = "joyeaxtell-sample-website-appinsights"
+  location            = azurerm_resource_group.joeyaxtell-sample-website-appinsights.location
+  resource_group_name = azurerm_resource_group.joeyaxtell-sample-website-appinsights.name
+  workspace_id        = azurerm_log_analytics_workspace.joeyaxtell-sample-website-loganalytics.id
   application_type    = "web"
+}
+
+# Setup for Azure Front Door load balancer
+resource "azurerm_frontdoor" "joeyaxtell-sample-website" {
+  name                                         = var.frontdoor_name
+  resource_group_name                          = azurerm_resource_group.joeyaxtell-sample-website.name
+  enforce_backend_pools_certificate_name_check = false
+
+  routing_rule {
+    name               = "joeyaxtell-sample-website-routingrule"
+    accepted_protocols = ["Http", "Https"]
+    patterns_to_match  = ["/*"]
+    frontend_endpoints = ["joeyaxtell-sample-website-frontdoor-frontend"]
+    forwarding_configuration {
+      forwarding_protocol = "MatchRequest"
+      backend_pool_name   = var.frontdoor_backend_pool
+    }
+  }
+
+  backend_pool_load_balancing {
+    name = "joeyaxtell-sample-website-frontdoor-loadbalancer"
+  }
+
+  backend_pool_health_probe {
+    name = "joeyaxtell-sample-website-frontdoor-healthprobe"
+    protocol = "Https"
+    interval_in_seconds = 30
+  }
+
+  backend_pool {
+    name = var.frontdoor_backend_pool
+    backend {
+      host_header = "${var.appsvc_name}.azurewebsites.net"
+      address     = "${var.appsvc_name}.azurewebsites.net"
+      http_port   = 80
+      https_port  = 443
+    }
+    backend {
+      host_header = "${var.appsvc_name}-secondary.azurewebsites.net"
+      address     = "${var.appsvc_name}-secondary.azurewebsites.net"
+      http_port   = 80
+      https_port  = 443
+    }
+
+    load_balancing_name = "joeyaxtell-sample-website-frontdoor-loadbalancer"
+    health_probe_name   = "joeyaxtell-sample-website-frontdoor-healthprobe"
+  }
+
+  frontend_endpoint {
+    name      = "joeyaxtell-sample-website-frontdoor-frontend"
+    host_name = "joeyaxtell-sample-website-frontdoor.azurefd.net"
+  }
 }

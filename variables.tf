@@ -1,3 +1,8 @@
+variable "Github_OAuth"{
+  description = "Environment variable for GitHub Oauth key"
+  type        = string
+}
+
 variable "rg1_name" {
   description = "Value of the Name tag for the resource group"
   type        = string
@@ -50,4 +55,16 @@ variable "autoscale_name" {
   description = "Value of the Name tag for the autoscale setting"
   type        = string
   default     = "joeyaxtell-sample-website-autoscale-settings"
+}
+
+variable "frontdoor_name" {
+  description = "Value of the Name tag for the frontdoor setting"
+  type        = string
+  default     = "joeyaxtell-sample-website-frontdoor"
+}
+
+variable "frontdoor_backend_pool" {
+  description = "Value of the Name tag for the frontdoor backend pool setting"
+  type        = string
+  default     = "joeyaxtell-sample-website-frontdoor-backendpool"
 }

@@ -17,6 +17,7 @@ For this project you'll need the following
         -   Follow directions here <https://docs.microsoft.com/en-us/cli/azure/install-azure-cli>
     -   Active Azure subscription
     -   GitHub Oauth token to <https://github.com/thos25/Sample-Website> for CI/CD Pipeline
+        -   As of this writing the Oauth token needs to be made into an environment variable called "TF_VAR_Github_OAuth"
 
 
 # Deploy
