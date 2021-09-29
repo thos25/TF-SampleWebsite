@@ -11,7 +11,7 @@ terraform {
   required_providers {
     azurerm = {
       source  = "hashicorp/azurerm"
-      version = "=2.77.0"
+      version = "=2.78.0"
     }
   }
 }
@@ -256,7 +256,7 @@ resource "azurerm_frontdoor" "joeyaxtell-sample-website" {
     name               = "joeyaxtell-sample-website-routingrule"
     accepted_protocols = ["Http", "Https"]
     patterns_to_match  = ["/*"]
-    frontend_endpoints = ["joeyaxtell-sample-website-frontdoor-frontend"]
+    frontend_endpoints = ["joeyaxtell-sample-website-frontdoor"]
     forwarding_configuration {
       forwarding_protocol = "MatchRequest"
       backend_pool_name   = var.frontdoor_backend_pool
@@ -293,7 +293,7 @@ resource "azurerm_frontdoor" "joeyaxtell-sample-website" {
   }
 
   frontend_endpoint {
-    name      = "joeyaxtell-sample-website-frontdoor-frontend"
+    name      = "joeyaxtell-sample-website-frontdoor"
     host_name = "joeyaxtell-sample-website-frontdoor.azurefd.net"
   }
 }
